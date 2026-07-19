@@ -6,6 +6,7 @@ lib_main.c - Реализация библиотеки хеш-таблицы и 
 #include "lib_main.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Функция вычисляет хеш-сумму для строки по алгоритму djb2
 // key - указатель на нуль-терминированную строку
@@ -67,4 +68,51 @@ void ht_destroy(HashTable* table) {
 
     free(table->buckets);
     free(table);
+}
+
+// Функция добавляет строку в таблицу или увеличивает счетчик, если она уже есть
+// table - указатель на хеш-таблицу
+// key - строка-ключ для добавления
+int ht_insert(HashTable* table, const char* key) {
+    if (!table || !key) {
+        return 0;
+    }
+
+    size_t hash = hash_djb2(key);
+    size_t index = hash % table->size; // Находим индекс бакета
+
+    // Проверяем, есть ли уже такой ключ в цепочке
+    HashNode* current = table->buckets[index];
+    while (current) {
+        if (strcmp(current->key, key) == 0) {
+            current->count++; // Если нашли, просто увеличиваем счетчик
+            return 1;
+        }
+        current = current->next;
+    }
+
+    // Если ключа нет, создаем новый узел
+    HashNode* new_node = (HashNode*)malloc(sizeof(HashNode));
+    if (!new_node) {
+        fprintf(stderr, "Error: memory allocation failed for new node\n");
+        return 0;
+    }
+
+    // Выделяем память под строку и копируем её (чтобы не зависеть от внешнего массива)
+    new_node->key = (char*)malloc(strlen(key) + 1);
+    if (!new_node->key) {
+        fprintf(stderr, "Error: memory allocation failed for node key\n");
+        free(new_node);
+        return 0;
+    }
+    strcpy(new_node->key, key);
+    new_node->count = 1;
+
+    // Вставляем новый узел в начало цепочки (так быстрее всего)
+    new_node->next = table->buckets[index];
+    table->buckets[index] = new_node;
+
+    table->count++; // Увеличиваем общее количество элементов
+
+    return 1;
 }
