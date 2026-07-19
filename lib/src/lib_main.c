@@ -261,3 +261,39 @@ void ht_rebuild(HashTable* table) {
     table->buckets = new_buckets;
     table->size = new_size;
 }
+
+// Функция разбирает текстовый файл по словам и добавляет их в хеш-таблицу
+// table - указатель на хеш-таблицу
+// filename - путь к текстовому файлу
+int parse_file(HashTable* table, const char* filename) {
+    if (!table || !filename) {
+        return 0;
+    }
+
+    // Открываем файл для чтения
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        fprintf(stderr, "Error: cannot open file %s\n", filename);
+        return 0;
+    }
+
+    char buffer[1024]; // Буфер для чтения строк
+    // Набор символов, которые считаются разделителями слов (пробелы и знаки препинания)
+    const char* delimiters = " \t\n\r.,;:!?()[]{}'\"";
+
+    // Читаем файл построчно
+    while (fgets(buffer, sizeof(buffer), file)) {
+        // Выделяем первое слово в строке с помощью strtok
+        char* word = strtok(buffer, delimiters);
+
+        while (word) {
+            // TODO: В следующем коммите добавим вызов ht_insert(table, word)
+
+            // Получаем следующее слово
+            word = strtok(NULL, delimiters);
+        }
+    }
+
+    fclose(file);
+    return 1;
+}
