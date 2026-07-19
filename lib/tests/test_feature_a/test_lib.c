@@ -106,6 +106,31 @@ void test_ht_delete(void) {
     ht_destroy(ht);
 }
 
+// Функция тестирует автоматическое перестроение таблицы (рехеширование)
+// void - аргументы отсутствуют
+void test_ht_rebuild_auto(void) {
+    HashTable* ht = ht_create(2); // Создаем специально очень маленькую таблицу
+
+    ht_insert(ht, "apple");
+    ht_insert(ht, "banana");
+    ht_insert(ht, "cherry");
+    ht_insert(ht, "date");
+    ht_insert(ht, "elderberry");
+
+    // Начальный размер был 2. 
+    // На 3-м элементе (cherry): count (2) >= size (2) -> рехеш до 4.
+    // На 5-м элементе (elderberry): count (4) >= size (4) -> рехеш до 8.
+    TEST_ASSERT_EQUAL_size_t(8, ht->size);
+    TEST_ASSERT_EQUAL_size_t(5, ht->count);
+
+    // Проверяем, что при перебрасывании узлов данные не потерялись
+    TEST_ASSERT_NOT_NULL(ht_search(ht, "apple"));
+    TEST_ASSERT_NOT_NULL(ht_search(ht, "cherry"));
+    TEST_ASSERT_NOT_NULL(ht_search(ht, "elderberry"));
+
+    ht_destroy(ht);
+}
+
 // Функция является точкой входа для запуска тестов Unity
 // void - аргументы отсутствуют
 int main(void) {
@@ -115,7 +140,8 @@ int main(void) {
     RUN_TEST(test_ht_create_zero_size);
     RUN_TEST(test_ht_insert_and_search);
     RUN_TEST(test_ht_insert_duplicate);
-    RUN_TEST(test_ht_delete); // Добавили вызов нового теста
+    RUN_TEST(test_ht_delete);
+    RUN_TEST(test_ht_rebuild_auto); // Вызов нового теста
 
     return UNITY_END();
 }

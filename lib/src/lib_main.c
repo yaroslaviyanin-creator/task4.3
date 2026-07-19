@@ -78,6 +78,13 @@ int ht_insert(HashTable* table, const char* key) {
         return 0;
     }
 
+    // Проверяем фактор загрузки (load factor). 
+    // Если количество элементов равно или больше размера массива (в среднем 1 элемент на список),
+    // таблица начинает работать медленно, поэтому мы её перестраиваем.
+    if (table->count >= table->size) {
+        ht_rebuild(table);
+    }
+
     size_t hash = hash_djb2(key);
     size_t index = hash % table->size; // Находим индекс бакета
 
@@ -98,7 +105,7 @@ int ht_insert(HashTable* table, const char* key) {
         return 0;
     }
 
-    // Выделяем память под строку и копируем её (чтобы не зависеть от внешнего массива)
+    // Выделяем память под строку и копируем её
     new_node->key = (char*)malloc(strlen(key) + 1);
     if (!new_node->key) {
         fprintf(stderr, "Error: memory allocation failed for node key\n");
@@ -108,7 +115,7 @@ int ht_insert(HashTable* table, const char* key) {
     strcpy(new_node->key, key);
     new_node->count = 1;
 
-    // Вставляем новый узел в начало цепочки (так быстрее всего)
+    // Вставляем новый узел в начало цепочки
     new_node->next = table->buckets[index];
     table->buckets[index] = new_node;
 
@@ -177,4 +184,80 @@ int ht_delete(HashTable* table, const char* key) {
     }
 
     return 0; // Ключ не найден
+}
+
+// Функция перестраивает хеш-таблицу, увеличивая её размер в 2 раза (рехеширование)
+// table - указатель на хеш-таблицу
+void ht_rebuild(HashTable* table) {
+    if (!table) {
+        return;
+    }
+
+    size_t new_size = table->size * 2;
+    // Создаем новый массив бакетов увеличенного размера
+    HashNode** new_buckets = (HashNode**)calloc(new_size, sizeof(HashNode*));
+    if (!new_buckets) {
+        fprintf(stderr, "Error: memory allocation failed during rebuild\n");
+        return;
+    }
+
+    // Переносим все существующие узлы в новый массив
+    for (size_t i = 0; i < table->size; i++) {
+        HashNode* current = table->buckets[i];
+        while (current) {
+            HashNode* next = current->next; // Запоминаем следующий узел в старой цепочке
+
+            // Вычисляем новый индекс для текущего узла
+            size_t new_index = hash_djb2(current->key) % new_size;
+
+            // Вставляем текущий узел в новую цепочку
+            current->next = new_buckets[new_index];
+            new_buckets[new_index] = current;
+
+            current = next; // Переходим к следующему узлу
+        }
+    }
+
+    // Освобождаем старый массив бакетов и обновляем указатели
+    free(table->buckets);
+    table->buckets = new_buckets;
+    table->size = new_size;
+}
+
+// Функция перестраивает хеш-таблицу, увеличивая её размер в 2 раза (рехеширование)
+// table - указатель на хеш-таблицу
+void ht_rebuild(HashTable* table) {
+    if (!table) {
+        return;
+    }
+
+    size_t new_size = table->size * 2;
+    // Создаем новый массив бакетов увеличенного размера
+    HashNode** new_buckets = (HashNode**)calloc(new_size, sizeof(HashNode*));
+    if (!new_buckets) {
+        fprintf(stderr, "Error: memory allocation failed during rebuild\n");
+        return;
+    }
+
+    // Переносим все существующие узлы в новый массив
+    for (size_t i = 0; i < table->size; i++) {
+        HashNode* current = table->buckets[i];
+        while (current) {
+            HashNode* next = current->next; // Запоминаем следующий узел в старой цепочке
+
+            // Вычисляем новый индекс для текущего узла
+            size_t new_index = hash_djb2(current->key) % new_size;
+
+            // Вставляем текущий узел в новую цепочку
+            current->next = new_buckets[new_index];
+            new_buckets[new_index] = current;
+
+            current = next; // Переходим к следующему узлу
+        }
+    }
+
+    // Освобождаем старый массив бакетов и обновляем указатели
+    free(table->buckets);
+    table->buckets = new_buckets;
+    table->size = new_size;
 }
