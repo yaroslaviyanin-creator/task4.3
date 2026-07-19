@@ -83,6 +83,29 @@ void test_ht_insert_duplicate(void) {
     ht_destroy(ht);
 }
 
+// Функция тестирует удаление узлов
+// void - аргументы отсутствуют
+void test_ht_delete(void) {
+    HashTable* ht = ht_create(10);
+
+    ht_insert(ht, "apple");
+    ht_insert(ht, "banana");
+
+    // Удаляем существующий элемент
+    TEST_ASSERT_EQUAL_INT(1, ht_delete(ht, "apple"));
+    // Проверяем, что счетчик уменьшился
+    TEST_ASSERT_EQUAL_size_t(1, ht->count);
+
+    // Проверяем, что элемент действительно не ищется
+    HashNode* node = ht_search(ht, "apple");
+    TEST_ASSERT_NULL(node);
+
+    // Пытаемся удалить несуществующий элемент (должно вернуть 0)
+    TEST_ASSERT_EQUAL_INT(0, ht_delete(ht, "cherry"));
+
+    ht_destroy(ht);
+}
+
 // Функция является точкой входа для запуска тестов Unity
 // void - аргументы отсутствуют
 int main(void) {
@@ -92,6 +115,7 @@ int main(void) {
     RUN_TEST(test_ht_create_zero_size);
     RUN_TEST(test_ht_insert_and_search);
     RUN_TEST(test_ht_insert_duplicate);
+    RUN_TEST(test_ht_delete); // Добавили вызов нового теста
 
     return UNITY_END();
 }
