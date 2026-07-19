@@ -7,6 +7,7 @@ lib_main.c - Реализация библиотеки хеш-таблицы и 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 // Функция вычисляет хеш-сумму для строки по алгоритму djb2
 // key - указатель на нуль-терминированную строку
@@ -270,26 +271,29 @@ int parse_file(HashTable* table, const char* filename) {
         return 0;
     }
 
-    // Открываем файл для чтения
     FILE* file = fopen(filename, "r");
     if (!file) {
         fprintf(stderr, "Error: cannot open file %s\n", filename);
         return 0;
     }
 
-    char buffer[1024]; // Буфер для чтения строк
-    // Набор символов, которые считаются разделителями слов (пробелы и знаки препинания)
+    char buffer[1024];
     const char* delimiters = " \t\n\r.,;:!?()[]{}'\"";
 
-    // Читаем файл построчно
     while (fgets(buffer, sizeof(buffer), file)) {
-        // Выделяем первое слово в строке с помощью strtok
         char* word = strtok(buffer, delimiters);
 
         while (word) {
-            // TODO: В следующем коммите добавим вызов ht_insert(table, word)
+            // Приводим слово к нижнему регистру, чтобы "Apple" и "apple" считались одним словом
+            for (int i = 0; word[i]; i++) {
+                word[i] = tolower((unsigned char)word[i]);
+            }
 
-            // Получаем следующее слово
+            // Защита от пустых строк, которые могли остаться после фильтрации
+            if (word[0] != '\0') {
+                ht_insert(table, word);
+            }
+
             word = strtok(NULL, delimiters);
         }
     }
