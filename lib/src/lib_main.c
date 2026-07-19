@@ -116,3 +116,27 @@ int ht_insert(HashTable* table, const char* key) {
 
     return 1;
 }
+
+// Функция ищет узел по ключу в хеш-таблице
+// table - указатель на хеш-таблицу
+// key - искомая строка-ключ
+HashNode* ht_search(HashTable* table, const char* key) {
+    if (!table || !key) {
+        return NULL;
+    }
+
+    size_t hash = hash_djb2(key);
+    size_t index = hash % table->size;
+
+    HashNode* current = table->buckets[index];
+
+    // Проходим по цепочке в поиске нужного ключа
+    while (current) {
+        if (strcmp(current->key, key) == 0) {
+            return current; // Узел найден
+        }
+        current = current->next;
+    }
+
+    return NULL; // Узел не найден
+}

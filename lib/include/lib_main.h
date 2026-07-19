@@ -38,3 +38,9 @@ void ht_destroy(HashTable* table);
 // key - строка-ключ для добавления
 // Возвращает 1 в случае успеха, 0 при ошибке выделения памяти
 int ht_insert(HashTable* table, const char* key);
+
+// Функция ищет узел по ключу в хеш-таблице
+// table - указатель на хеш-таблицу
+// key - искомая строка-ключ
+// Возвращает указатель на найденный узел или NULL, если ключ не найден
+HashNode* ht_search(HashTable* table, const char* key);
