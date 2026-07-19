@@ -78,6 +78,13 @@ int ht_insert(HashTable* table, const char* key) {
         return 0;
     }
 
+    // Проверяем фактор загрузки (load factor). 
+    // Если количество элементов равно или больше размера массива (в среднем 1 элемент на список),
+    // таблица начинает работать медленно, поэтому мы её перестраиваем.
+    if (table->count >= table->size) {
+        ht_rebuild(table);
+    }
+
     size_t hash = hash_djb2(key);
     size_t index = hash % table->size; // Находим индекс бакета
 
@@ -98,7 +105,7 @@ int ht_insert(HashTable* table, const char* key) {
         return 0;
     }
 
-    // Выделяем память под строку и копируем её (чтобы не зависеть от внешнего массива)
+    // Выделяем память под строку и копируем её
     new_node->key = (char*)malloc(strlen(key) + 1);
     if (!new_node->key) {
         fprintf(stderr, "Error: memory allocation failed for node key\n");
@@ -108,7 +115,7 @@ int ht_insert(HashTable* table, const char* key) {
     strcpy(new_node->key, key);
     new_node->count = 1;
 
-    // Вставляем новый узел в начало цепочки (так быстрее всего)
+    // Вставляем новый узел в начало цепочки
     new_node->next = table->buckets[index];
     table->buckets[index] = new_node;
 
