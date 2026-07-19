@@ -50,3 +50,7 @@ HashNode* ht_search(HashTable* table, const char* key);
 // key - строка-ключ для удаления
 // Возвращает 1 при успешном удалении, 0 если ключ не найден
 int ht_delete(HashTable* table, const char* key);
+
+// Функция перестраивает хеш-таблицу, увеличивая её размер в 2 раза (рехеширование)
+// table - указатель на хеш-таблицу
+void ht_rebuild(HashTable* table);
