@@ -7,6 +7,7 @@ lib_main.c - Реализация библиотеки хеш-таблицы и 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 // Функция вычисляет хеш-сумму для строки по алгоритму djb2
 // key - указатель на нуль-терминированную строку
@@ -260,4 +261,43 @@ void ht_rebuild(HashTable* table) {
     free(table->buckets);
     table->buckets = new_buckets;
     table->size = new_size;
+}
+
+// Функция разбирает текстовый файл по словам и добавляет их в хеш-таблицу
+// table - указатель на хеш-таблицу
+// filename - путь к текстовому файлу
+int parse_file(HashTable* table, const char* filename) {
+    if (!table || !filename) {
+        return 0;
+    }
+
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        fprintf(stderr, "Error: cannot open file %s\n", filename);
+        return 0;
+    }
+
+    char buffer[1024];
+    const char* delimiters = " \t\n\r.,;:!?()[]{}'\"";
+
+    while (fgets(buffer, sizeof(buffer), file)) {
+        char* word = strtok(buffer, delimiters);
+
+        while (word) {
+            // Приводим слово к нижнему регистру, чтобы "Apple" и "apple" считались одним словом
+            for (int i = 0; word[i]; i++) {
+                word[i] = tolower((unsigned char)word[i]);
+            }
+
+            // Защита от пустых строк, которые могли остаться после фильтрации
+            if (word[0] != '\0') {
+                ht_insert(table, word);
+            }
+
+            word = strtok(NULL, delimiters);
+        }
+    }
+
+    fclose(file);
+    return 1;
 }
