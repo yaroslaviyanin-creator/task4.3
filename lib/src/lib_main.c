@@ -140,3 +140,41 @@ HashNode* ht_search(HashTable* table, const char* key) {
 
     return NULL; // Узел не найден
 }
+
+// Функция удаляет узел по ключу из хеш-таблицы
+// table - указатель на хеш-таблицу
+// key - строка-ключ для удаления
+int ht_delete(HashTable* table, const char* key) {
+    if (!table || !key) {
+        return 0;
+    }
+
+    size_t hash = hash_djb2(key);
+    size_t index = hash % table->size;
+
+    HashNode* current = table->buckets[index];
+    HashNode* prev = NULL;
+
+    // Идем по списку и ищем элемент, запоминая предыдущий узел
+    while (current) {
+        if (strcmp(current->key, key) == 0) {
+            // Если удаляем не первый элемент цепочки
+            if (prev) {
+                prev->next = current->next;
+            }
+            // Если удаляем голову (первый элемент) цепочки
+            else {
+                table->buckets[index] = current->next;
+            }
+
+            free(current->key);
+            free(current);
+            table->count--; // Уменьшаем общее количество
+            return 1; // Успешно удалили
+        }
+        prev = current;
+        current = current->next;
+    }
+
+    return 0; // Ключ не найден
+}

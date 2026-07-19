@@ -44,3 +44,9 @@ int ht_insert(HashTable* table, const char* key);
 // key - искомая строка-ключ
 // Возвращает указатель на найденный узел или NULL, если ключ не найден
 HashNode* ht_search(HashTable* table, const char* key);
+
+// Функция удаляет узел по ключу из хеш-таблицы
+// table - указатель на хеш-таблицу
+// key - строка-ключ для удаления
+// Возвращает 1 при успешном удалении, 0 если ключ не найден
+int ht_delete(HashTable* table, const char* key);
