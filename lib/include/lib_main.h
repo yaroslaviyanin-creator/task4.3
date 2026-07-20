@@ -60,3 +60,9 @@ void ht_rebuild(HashTable* table);
 // filename - путь к текстовому файлу
 // Возвращает 1 при успехе, 0 при ошибке открытия файла
 int parse_file(HashTable* table, const char* filename);
+
+// Функция генерирует тестовый файл с заданным числом случайных слов
+// filename - имя создаваемого файла
+// num_words - количество слов
+// Возвращает 1 при успехе, 0 при ошибке
+int generate_large_file(const char* filename, size_t num_words);

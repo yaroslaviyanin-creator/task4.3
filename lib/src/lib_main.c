@@ -301,3 +301,42 @@ int parse_file(HashTable* table, const char* filename) {
     fclose(file);
     return 1;
 }
+
+// Функция генерирует тестовый файл с заданным числом случайных слов
+// filename - имя создаваемого файла
+// num_words - количество слов
+int generate_large_file(const char* filename, size_t num_words) {
+    if (!filename) {
+        return 0;
+    }
+
+    FILE* file = fopen(filename, "w");
+    if (!file) {
+        fprintf(stderr, "Error: cannot create file %s\n", filename);
+        return 0;
+    }
+
+    // Небольшой словарь для генерации текста
+    const char* dictionary[] = {
+        "apple", "banana", "cherry", "student", "university",
+        "programming", "hash", "table", "computer", "science",
+        "hello", "world", "pointer", "memory", "allocation"
+    };
+    int dict_size = 15; // Размер словаря
+
+    for (size_t i = 0; i < num_words; i++) {
+        // Пишем случайное слово из словаря
+        fprintf(file, "%s", dictionary[rand() % dict_size]);
+
+        // Добавляем пробел, а каждые 15 слов - перенос строки для красоты
+        if ((i + 1) % 15 == 0) {
+            fprintf(file, "\n");
+        }
+        else {
+            fprintf(file, " ");
+        }
+    }
+
+    fclose(file);
+    return 1;
+}
